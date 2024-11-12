@@ -1,4 +1,3 @@
-
 package prog1ex;
 
 /**
@@ -11,10 +10,7 @@ public class Prog1ex {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // Variable to store the total sales
-        int totalSales = 0;
-         int TotalSales = 0;
-       // Array to hold the movies
+        // Array to hold the movies
         String[] movies = {"Napoleon", "Oppenheimer"};
         // 2D array for the sales values
         int[][] sales = {{3000, 1500, 1700}, {3500, 1200, 1600}};
@@ -35,30 +31,23 @@ public class Prog1ex {
             for (int j = 0; j < sales[i].length; j++) {
                 System.out.print(sales[i][j] + "\t\t"); // Print sales for the month
             }
-             // Calculate the total sales for the current movie
+            // Calculate the total sales for the current movie
             total[i] = salesCalculator.calculateTotalSales(sales, i);
             // Print the total sales for the current movie
             System.out.print(total[i] + " \t");
-             // Accumulate total sales for Agent 1 and Agent 2 separately
-                if (i == 0) {  // Accumulate total sales for Agent 1
-                    TotalSales += sales[i][j];
-                } else if (i == 1) {  // Accumulate total sales for Agent 2
-                    totalSales += sales[i][j];
-                }
-         
             // Move to the next line 
             System.out.println();
         }
-       
-          System.out.println();
-        System.out.println("Total moive ticket Sales for Napoleon: "  + TotalSales);
         
-        // Print the total sales for Agent 2
-        System.out.println("Total moive ticket Sales for Oppenheimer" + totalSales);
-
-      
+        // Display the total sales for each movie
+        System.out.println("\nTotal movie ticket sales:");
+        for (int i = 0; i < movies.length; i++) {
+            System.out.println(movies[i] + ": " + total[i]);
+        }
+        
         // Display the movie with the highest total sales
         String highestSalesMovie = salesCalculator.findMovieWithHighestSales(movies, total);
+        System.out.println("**********************************************************");
         System.out.println("Movie with the highest total sales: " + highestSalesMovie);
     }
 }
