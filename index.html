@@ -3,6 +3,7 @@ package progq2;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import javax.swing.SwingUtilities;
 
 public class ProgQ2 {
 
@@ -17,8 +18,6 @@ public class ProgQ2 {
             writer.write("*************************\n");
             writer.write("Movie Name : Napoleon \n");
             writer.write("MOVIE TICKET PRICE: 100\n");
-            writer.write("NUMBER OF TICKETS: 3\n");        
-            writer.write("TOTAL TICKET PRICE: 300\n");
             writer.write("*************************\n");
             System.out.println("File writing completed successfully.");
         } catch (IOException e) {
@@ -45,8 +44,9 @@ import java.util.HashMap;
 public class MovieTickets extends JFrame {
 
     private JComboBox<String> selectMovieCombo; // Combo box for movies
-    private JList<String> infoList; // List box for displaying movie information
+    private JTextField ticketCountField; // Input field for number of tickets
     private DefaultListModel<String> listModel; // Model for the JList
+    private JList<String> infoList; // List box for displaying movie information
     private HashMap<String, String[]> movieData; // HashMap to store movie information
 
     public MovieTickets() {
@@ -57,40 +57,44 @@ public class MovieTickets extends JFrame {
         setLayout(new BorderLayout());
 
         // Menu bar setup
-        JMenuBar menuBar = new JMenuBar(); // Create a menu bar
-        JMenu fileMenu = new JMenu("File"); // File menu with "Exit" option
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
         JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(e -> System.exit(0)); // Close application when Exit is clicked
-        fileMenu.add(exitItem); // Add exit item to File menu
+        exitItem.addActionListener(e -> System.exit(0));
+        fileMenu.add(exitItem);
 
-        // Tools menu setup with "Process" and "Clear" options
         JMenu toolsMenu = new JMenu("Tools");
         JMenuItem processItem = new JMenuItem("Process");
-        processItem.addActionListener(new ProcessButtonListener()); // Process button functionality
+        processItem.addActionListener(new ProcessButtonListener());
 
         JMenuItem clearItem = new JMenuItem("Clear");
-        clearItem.addActionListener(new ClearButtonListener()); // Clear button functionality
+        clearItem.addActionListener(new ClearButtonListener());
 
-        // Add items to the Tools menu
         toolsMenu.add(processItem);
         toolsMenu.add(clearItem);
 
-        // Add menus to the menu bar and set it for the frame
         menuBar.add(fileMenu);
         menuBar.add(toolsMenu);
         setJMenuBar(menuBar);
 
         // Dropdown options for movie choices
         String[] movies = {"Napoleon"};
-        selectMovieCombo = new JComboBox<>(movies); // Movie dropdown
+        selectMovieCombo = new JComboBox<>(movies);
         add(selectMovieCombo, BorderLayout.NORTH);
+
+        // Input field for number of tickets
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(new JLabel("Number of Tickets:"));
+        ticketCountField = new JTextField(10);
+        inputPanel.add(ticketCountField);
+        add(inputPanel, BorderLayout.CENTER);
 
         // List box for displaying movie information
         listModel = new DefaultListModel<>();
         infoList = new JList<>(listModel);
-        add(new JScrollPane(infoList), BorderLayout.CENTER);
+        add(new JScrollPane(infoList), BorderLayout.SOUTH);
 
-        // Load movie data from file and populate combo box
+        // Load movie data from file
         movieData = new HashMap<>();
         loadMovieData();
     }
@@ -99,8 +103,19 @@ public class MovieTickets extends JFrame {
     private void loadMovieData() {
         try (BufferedReader reader = new BufferedReader(new FileReader("movies.txt"))) {
             String line;
+            String movieName = null;
+            String ticketPrice = null;
             while ((line = reader.readLine()) != null) {
-                listModel.addElement(line);
+                if (line.startsWith("Movie Name")) {
+                    movieName = line.split(":")[1].trim();
+                } else if (line.startsWith("MOVIE TICKET PRICE")) {
+                    ticketPrice = line.split(":")[1].trim();
+                }
+                if (movieName != null && ticketPrice != null) {
+                    movieData.put(movieName, new String[]{ticketPrice});
+                    movieName = null;
+                    ticketPrice = null;
+                }
             }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error loading movie data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -112,11 +127,19 @@ public class MovieTickets extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String selectedMovie = (String) selectMovieCombo.getSelectedItem();
-            if (selectedMovie != null && movieData.containsKey(selectedMovie)) {
+            String ticketCountStr = ticketCountField.getText();
+            if (selectedMovie != null && movieData.containsKey(selectedMovie) && !ticketCountStr.isEmpty()) {
+                int ticketCount = Integer.parseInt(ticketCountStr);
+                int ticketPrice = Integer.parseInt(movieData.get(selectedMovie)[0]);
+                int totalPrice = ticketCount * ticketPrice;
+
                 listModel.clear();
-                for (String info : movieData.get(selectedMovie)) {
-                    listModel.addElement(info);
-                }
+                listModel.addElement("Movie Name: " + selectedMovie);
+                listModel.addElement("Ticket Price: " + ticketPrice);
+                listModel.addElement("Number of Tickets: " + ticketCount);
+                listModel.addElement("Total Price: " + totalPrice);
+            } else {
+                JOptionPane.showMessageDialog(MovieTickets.this, "Invalid movie or ticket count", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -129,3 +152,6 @@ public class MovieTickets extends JFrame {
         }
     }
 }
+
+
+            
