@@ -1,53 +1,94 @@
-package prog1ex;
 
-/**
- *
- * @author RC_Student_lab
- */
-public class Prog1ex {
+package progq2;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.swing.SwingUtilities;
+
+public class ProgQ2 {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // Array to hold the movies
-        String[] movies = {"Napoleon", "Oppenheimer"};
-        // 2D array for the sales values
-        int[][] sales = {{3000, 1500, 1700}, {3500, 1200, 1600}};
-        
-        // Print header for the sales table
-        System.out.println("MOVIE TICKET SALES REPORT - 2024 \n");
-        System.out.println("\t\t JAN \t\t FEB\t\t MAR ");
-        System.out.println("**********************************************************");
-        
-        int[] total = new int[movies.length];
-        IMovieTickets salesCalculator = new MovieTickets();
+       // Create and populate the sequential file (snakes.txt)
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("snakes.txt"))) {
+            // Writing information about snakes to the file
+            writer.write("Movie TICKET REPORT\n");
+            writer.write("*************************\n");
+            writer.write("Movie Name : Napoleon \n");
+            writer.write("MOVIE TICKET PRICE: \n");
+            writer.write("NUMBER OF TICKETS: \n");        
+            writer.write("TOTAL TICKET PRICE: \n");
+             writer.write("*************************\n");
+            System.out.println("File writing completed successfully.");
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+    
+}
 
-        // Loop through each MOVIE
-        for (int i = 0; i < sales.length; i++) {
-            // Print the MOVIE
-            System.out.print(movies[i] + "\t");
-            // Print the sales for each month
-            for (int j = 0; j < sales[i].length; j++) {
-                System.out.print(sales[i][j] + "\t\t"); // Print sales for the month
-            }
-            // Calculate the total sales for the current movie
-            total[i] = salesCalculator.calculateTotalSales(sales, i);
-            // Print the total sales for the current movie
-            System.out.print(total[i] + " \t");
-            // Move to the next line 
-            System.out.println();
-        }
+package progq2;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
+public class MovieTickets extends JFrame {
+    
+     private JComboBox<String> selectMovieCombo; // Combo box for snake types
+    private JList<String> infoList; // List box for displaying movie information
+    private DefaultListModel<String> listModel; // Model for the JList
+    private HashMap<String, String[]> movieData; // HashMap to store snake information
+    public MovieTickets() {
+        setTitle("MOVIE TICKETS");
+        setSize(300, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+         // Menu bar setup
+        JMenuBar menuBar = new JMenuBar();     // Create a menu bar
+        JMenu fileMenu = new JMenu("File");    // File menu with "Exit" option
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(e -> System.exit(0)); // Close application when Exit is clicked
+        fileMenu.add(exitItem);                // Add exit item to File menu
+
+        // Tools menu setup with "Process" and "Clear" options
+        JMenu toolsMenu = new JMenu("Tools");  
+        JMenuItem processItem = new JMenuItem("Process");
+        processItem.addActionListener(new ProcesstButtonListener()); // process button functionality
+
+        JMenuItem clearItem = new JMenuItem("Clear");
+        clearItem.addActionListener(new ClearActionListener()); // clear button functionality
+
+        // Add items to the Tools menu
+        toolsMenu.add(processItem);
+        toolsMenu.add(clearItem);
+
+        // Add menus to the menu bar and set it for the frame
+        menuBar.add(fileMenu);
+        menuBar.add(toolsMenu);
+        setJMenuBar(menuBar);
         
-        // Display the total sales for each movie
-        System.out.println("\nTotal movie ticket sales:");
-        for (int i = 0; i < movies.length; i++) {
-            System.out.println(movies[i] + ": " + total[i]);
-        }
+        // Dropdown options for instrument choices
+        String[] movie = {"Napoleon"};
+        selectMovieCombo = new JComboBox<>(movie); // Instrument dropdown
         
-        // Display the movie with the highest total sales
-        String highestSalesMovie = salesCalculator.findMovieWithHighestSales(movies, total);
-        System.out.println("**********************************************************");
-        System.out.println("Movie with the highest total sales: " + highestSalesMovie);
+        
+        
+        // Load snake data from file and populate combo box
+        movieData = new HashMap<>();
+        loadMovieData();
+    
     }
 }
