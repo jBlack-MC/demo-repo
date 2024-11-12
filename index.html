@@ -1,10 +1,8 @@
-
 package progq2;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import javax.swing.SwingUtilities;
 
 public class ProgQ2 {
 
@@ -12,23 +10,26 @@ public class ProgQ2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-       // Create and populate the sequential file (snakes.txt)
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("snakes.txt"))) {
-            // Writing information about snakes to the file
-            writer.write("Movie TICKET REPORT\n");
+        // Create and populate the sequential file (movies.txt)
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("movies.txt"))) {
+            // Writing information about movies to the file
+            writer.write("MOVIE TICKET REPORT\n");
             writer.write("*************************\n");
             writer.write("Movie Name : Napoleon \n");
-            writer.write("MOVIE TICKET PRICE: \n");
-            writer.write("NUMBER OF TICKETS: \n");        
-            writer.write("TOTAL TICKET PRICE: \n");
-             writer.write("*************************\n");
+            writer.write("MOVIE TICKET PRICE: 100\n");
+            writer.write("NUMBER OF TICKETS: 3\n");        
+            writer.write("TOTAL TICKET PRICE: 300\n");
+            writer.write("*************************\n");
             System.out.println("File writing completed successfully.");
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
+
+        // Launch the Swing application
+        SwingUtilities.invokeLater(() -> new MovieTickets().setVisible(true));
     }
-    
 }
+
 
 package progq2;
 
@@ -39,37 +40,36 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class MovieTickets extends JFrame {
-    
-     private JComboBox<String> selectMovieCombo; // Combo box for snake types
+
+    private JComboBox<String> selectMovieCombo; // Combo box for movies
     private JList<String> infoList; // List box for displaying movie information
     private DefaultListModel<String> listModel; // Model for the JList
-    private HashMap<String, String[]> movieData; // HashMap to store snake information
+    private HashMap<String, String[]> movieData; // HashMap to store movie information
+
     public MovieTickets() {
         setTitle("MOVIE TICKETS");
-        setSize(300, 300);
+        setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-         // Menu bar setup
-        JMenuBar menuBar = new JMenuBar();     // Create a menu bar
-        JMenu fileMenu = new JMenu("File");    // File menu with "Exit" option
+        // Menu bar setup
+        JMenuBar menuBar = new JMenuBar(); // Create a menu bar
+        JMenu fileMenu = new JMenu("File"); // File menu with "Exit" option
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> System.exit(0)); // Close application when Exit is clicked
-        fileMenu.add(exitItem);                // Add exit item to File menu
+        fileMenu.add(exitItem); // Add exit item to File menu
 
         // Tools menu setup with "Process" and "Clear" options
-        JMenu toolsMenu = new JMenu("Tools");  
+        JMenu toolsMenu = new JMenu("Tools");
         JMenuItem processItem = new JMenuItem("Process");
-        processItem.addActionListener(new ProcesstButtonListener()); // process button functionality
+        processItem.addActionListener(new ProcessButtonListener()); // Process button functionality
 
         JMenuItem clearItem = new JMenuItem("Clear");
-        clearItem.addActionListener(new ClearActionListener()); // clear button functionality
+        clearItem.addActionListener(new ClearButtonListener()); // Clear button functionality
 
         // Add items to the Tools menu
         toolsMenu.add(processItem);
@@ -79,16 +79,53 @@ public class MovieTickets extends JFrame {
         menuBar.add(fileMenu);
         menuBar.add(toolsMenu);
         setJMenuBar(menuBar);
-        
-        // Dropdown options for instrument choices
-        String[] movie = {"Napoleon"};
-        selectMovieCombo = new JComboBox<>(movie); // Instrument dropdown
-        
-        
-        
-        // Load snake data from file and populate combo box
+
+        // Dropdown options for movie choices
+        String[] movies = {"Napoleon"};
+        selectMovieCombo = new JComboBox<>(movies); // Movie dropdown
+        add(selectMovieCombo, BorderLayout.NORTH);
+
+        // List box for displaying movie information
+        listModel = new DefaultListModel<>();
+        infoList = new JList<>(listModel);
+        add(new JScrollPane(infoList), BorderLayout.CENTER);
+
+        // Load movie data from file and populate combo box
         movieData = new HashMap<>();
         loadMovieData();
-    
+    }
+
+    // Load movie data from file
+    private void loadMovieData() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("movies.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                listModel.addElement(line);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error loading movie data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Action listener for the Process button
+    private class ProcessButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String selectedMovie = (String) selectMovieCombo.getSelectedItem();
+            if (selectedMovie != null && movieData.containsKey(selectedMovie)) {
+                listModel.clear();
+                for (String info : movieData.get(selectedMovie)) {
+                    listModel.addElement(info);
+                }
+            }
+        }
+    }
+
+    // Action listener for the Clear button
+    private class ClearButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            listModel.clear();
+        }
     }
 }
